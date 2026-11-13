@@ -5,6 +5,7 @@ import {
   filterIssues,
   filterPullRequests,
   filterRepos,
+  openPullRequestTabCount,
   matchesPullRequestPreset,
   sortIssues,
   sortPullRequests,
@@ -424,6 +425,33 @@ describe("dashboard utilities", () => {
     expect(matchesPullRequestPreset(pullRequests[1], "ready", "alice")).toBe(false);
     expect(matchesPullRequestPreset(pullRequests[2], "awaiting-review", "alice")).toBe(true);
     expect(matchesPullRequestPreset(pullRequests[0], "authored-me", "alice")).toBe(true);
+  });
+
+  it("counts the pull request tab from the filtered open list, excluding archived repos", () => {
+    const filters = {
+      search: "",
+      orgs: new Set<string>(),
+      repos: new Set<string>(),
+      labels: new Set<string>(),
+      authors: new Set<string>(),
+      excludedAuthors: new Set<string>(),
+      authorMode: "include" as const,
+      assignees: new Set<string>(),
+      dates: { cf: "", ct: "", uf: "", ut: "" },
+      preset: "",
+    };
+    const archived = {
+      ...pullRequests[0],
+      number: 469,
+      title: "Archived project change",
+      url: "https://gitlab.com/placeholder/python-api/-/merge_requests/469",
+      repository: { name: "python-api", nameWithOwner: "placeholder/python-api" },
+    };
+    const open = [...pullRequests, archived];
+
+    expect(openPullRequestTabCount(open, filters, "alice", new Set(["placeholder/python-api"]))).toBe(pullRequests.length);
+    expect(openPullRequestTabCount(open, { ...filters, search: "router" }, "alice", new Set(["placeholder/python-api"]))).toBe(1);
+    expect(openPullRequestTabCount(open, filters, "alice")).toBe(open.length);
   });
 
   it("filters PRs by repo, author and search", () => {

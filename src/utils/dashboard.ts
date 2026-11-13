@@ -267,6 +267,16 @@ export function filterPullRequests(prs: GhPullRequest[], filters: PullRequestFil
   });
 }
 
+/** Pull Requests tab badge: the same open list the page shows, including archived-repo exclusion. */
+export function openPullRequestTabCount(
+  pullRequests: GhPullRequest[],
+  filters: PullRequestFilters,
+  userLogin: string,
+  archivedRepoNames: Set<string> = new Set(),
+): number {
+  return filterPullRequests(pullRequests, filters, userLogin, archivedRepoNames).length;
+}
+
 export function sortPullRequests(prs: GhPullRequest[], sort: string): GhPullRequest[] {
   const sorted = [...prs];
   sorted.sort((a, b) => {
